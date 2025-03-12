@@ -1,76 +1,103 @@
-import { useCallback, useEffect, useState } from 'react'
-
-import './App.css'
+import { useCallback, useEffect, useState } from "react";
 
 function App() {
+  const [password, setPassword] = useState("");
+  const [length, setLength] = useState(16);
+  const [numberAllowed, setNumberAllowed] = useState(false);
+  const [charAllowed, setCharAllowed] = useState(false);
 
-  const [password, setPassword] = useState('');
-  const [length, setLength] = useState(7);
-  const [numberAllowed, setNumberFun] = useState(false);
-  const [charAllowed, setCharacterFun] = useState(false);
-  
-  
   const generatePassword = useCallback(() => {
-    let str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    let pass = ''
+    let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (numberAllowed) characters += "0123456789";
+    if (charAllowed) characters += "!@#$%^&*()";
 
-    if (numberAllowed) str += '0123456789'
-    if (charAllowed) str += '!@#$%^&*()'
-
-    for (let i = 1; i <= length; i++) {
-
-      let genPass = Math.floor(Math.random() * str.length + 1)
-      pass += str.charAt(genPass)
-
+    let newPassword = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      newPassword += characters[randomIndex];
     }
-    setPassword(pass)
-    // console.log(pass)
-    // console.log(charAllowed)
-    console.log(numberAllowed)
+    setPassword(newPassword);
+  }, [length, numberAllowed, charAllowed]);
 
-  }, [setPassword, length, numberAllowed, charAllowed])
+  const copyPassword = useCallback(() => {
+    navigator.clipboard.writeText(password).catch((err) => console.error("Copy failed", err));
+  }, [password]);
 
-  const copyPassword = useCallback(async () =>{
-    try {
-      window.navigator.clipboard.writeText(password)
-    } catch (error) {
-      console.log(error)
-    }
-  },[password])
-  
   useEffect(() => {
-    generatePassword()
-  }, [length, numberAllowed, charAllowed, setPassword])
+    generatePassword();
+  }, [length, numberAllowed, charAllowed]);
 
   return (
-    <>
-      <div className="flex justify-center place-content-center select-none">
-        <div className="mx-auto w-3/5 p-5 min-h-60 max-h=96 mt-40 rounded-xl bg-slate-200">
-        <h1 className='mx-auto text-4xl font-bold text-gray-500 my-4 '>Password Generator</h1>
-          <label htmlFor="default" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-          <div className="relative">
-            <input type='search' id="default" className="block w-full text-2xl p-4 ps-10 text-gray-900 outline-none border-none rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              value={password} readOnly />
-            <button type="submit" onClick={copyPassword} className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:hover:bg-blue-700">Copy</button>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-400 to-gray-600 text-white p-5">
+      <div className="w-full max-w-6xl p-12 md:p-16 bg-gray-800 rounded-3xl shadow-2xl backdrop-blur-lg">
+        {/* Title */}
+        <h1 className="text-5xl md:text-6xl font-extrabold text-center mb-8">🔑 Password Generator</h1>
+
+        {/* Password Display */}
+        <div className="relative mb-8">
+          <input
+            type="text"
+            readOnly
+            value={password}
+            className="w-full p-5 text-2xl md:text-3xl bg-gray-700 rounded-lg outline-none border-none text-center font-mono tracking-wide"
+          />
+          <button
+            onClick={copyPassword}
+            className="absolute right-5 top-1/2 transform -translate-y-1/2 bg-blue-600 px-5 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition-all"
+          >
+            Copy
+          </button>
+        </div>
+
+        {/* Controls */}
+        <div className="space-y-6">
+          {/* Length Slider */}
+          <div className="flex flex-col items-center">
+            <label className="text-lg md:text-xl font-semibold">Password Length: {length}</label>
+            <input
+              type="range"
+              min={5}
+              max={30}
+              value={length}
+              onChange={(e) => setLength(parseInt(e.target.value))}
+              className="w-4/5 mt-2"
+            />
           </div>
-          <div className="btns flex flex-wrap gap-3 mt-4">
-            <div className='flex gap-3'>
-              <input type="range" name="rang" id="rang" min={5} max={20} value={length} onChange={(e) => { setLength(e.target.value) }} />
-              <label htmlFor="rang" className=' font-bold text-orange-600'> Range: {length}</label>
-            </div>
-            <div className=' flex gap-2 ml-2'>
-              <input type="checkbox" name="characters" id="char" onChange={() => setCharacterFun(prev => !prev)}/>
-              <label htmlFor="char">Character</label>
-            </div>
-            <div className='flex gap-2 ml-2'>
-              <input type="checkbox" name="Number" id="number" onChange={() => setNumberFun(prev => !prev)}/>
-              <label htmlFor="number">Numbers</label>
-            </div>
+
+          {/* Checkbox Options */}
+          <div className="flex flex-col md:flex-row justify-between text-lg">
+            <label className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={charAllowed}
+                onChange={() => setCharAllowed((prev) => !prev)}
+                className="h-6 w-6"
+              />
+              <span>Include Special Characters</span>
+            </label>
+
+            <label className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                checked={numberAllowed}
+                onChange={() => setNumberAllowed((prev) => !prev)}
+                className="h-6 w-6"
+              />
+              <span>Include Numbers</span>
+            </label>
           </div>
+
+          {/* Generate Button */}
+          <button
+            onClick={generatePassword}
+            className="w-full p-5 mt-4 bg-blue-600 text-lg md:text-xl font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg"
+          >
+            Generate Password
+          </button>
         </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
