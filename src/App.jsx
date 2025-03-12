@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast"; // Import toast library
 
 function App() {
   const [password, setPassword] = useState("");
@@ -20,7 +21,15 @@ function App() {
   }, [length, numberAllowed, charAllowed]);
 
   const copyPassword = useCallback(() => {
-    navigator.clipboard.writeText(password).catch((err) => console.error("Copy failed", err));
+    if (!password) {
+      toast.error("No password to copy! ❌");
+      return;
+    }
+    navigator.clipboard.writeText(password).then(() => {
+      toast.success("Password copied to clipboard! 📋");
+    }).catch(() => {
+      toast.error("Failed to copy! ❌");
+    });
   }, [password]);
 
   useEffect(() => {
@@ -29,6 +38,7 @@ function App() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-blue-400 to-gray-600 text-white p-5">
+      <Toaster position="top-center" reverseOrder={false} /> {/* Toast Notifications */}
       <div className="w-full max-w-6xl p-12 md:p-16 bg-gray-800 rounded-3xl shadow-2xl backdrop-blur-lg">
         {/* Title */}
         <h1 className="text-5xl md:text-6xl font-extrabold text-center mb-8">🔑 Password Generator</h1>
